@@ -6,6 +6,8 @@
   	"db": 0
   },
   "game": {
-  	"expiration": 60
+  	"wikipedia": "http://pt.wikipedia.org",
+  	"session_expiration": 60,
+  	"match_expiration": 3
   }
 }
