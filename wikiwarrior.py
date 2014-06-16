@@ -66,7 +66,9 @@ def home():
 
 @app.route('/wiki')
 @app.route('/wiki/<article>')
-def wiki(article = str(currentgame()) ):
+def wiki(article = None ):
+  if article is None:
+    article = currentgame()
   wikipage = requests.get(wikipedia + "/wiki/" + article).text
   content = wikicontent(wikipage)
   response = make_response(render_template('wiki.html',
@@ -74,7 +76,7 @@ def wiki(article = str(currentgame()) ):
     current_game=gamename(),
     content=content['text'],
     infobox=content['infobox'],
-    title=article.replace('_',' ') 
+    title=unquote(article).decode('utf-8').replace('_', ' ')
     )
   )
   return response
