@@ -47,7 +47,16 @@ def unique_id():
 
 def wikicontent(html):
   content = BeautifulSoup(html)
-  return content.find('div', {'id': 'content'})
+  text = content.find('div', {'id': 'mw-content-text'})
+  for editsection in text.findAll('span', {'class': 'mw-editsection'}):
+    editsection.extract()
+  infobox = text.find('table', {'class': 'infobox_v2'})
+  if not infobox:
+    infobox = ""
+  else:
+    infobox = infobox.extract()
+  #text = content.find('span', {'class': 'mw-editsection'}).replaceWith('')
+  return {'text': text, 'infobox': infobox}
 
 @app.route('/')
 def home(): 
@@ -58,9 +67,16 @@ def home():
 @app.route('/wiki')
 @app.route('/wiki/<article>')
 def wiki(article = str(currentgame()) ):
-  wikipage = wikipedia + "/wiki/" + article
-  content = wikicontent(requests.get(wikipage).text)
-  response = make_response(render_template('wiki.html', app_name=app_name, current_game=gamename(), content=content))
+  wikipage = requests.get(wikipedia + "/wiki/" + article).text
+  content = wikicontent(wikipage)
+  response = make_response(render_template('wiki.html',
+    app_name=app_name,
+    current_game=gamename(),
+    content=content['text'],
+    infobox=content['infobox'],
+    title=article.replace('_',' ') 
+    )
+  )
   return response
 
 if __name__ == '__main__':
