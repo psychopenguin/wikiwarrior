@@ -7,6 +7,7 @@ from uuid import uuid4
 import redis
 import requests
 from urllib import unquote
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 config = json.loads(open('wikiwarrior.conf.json').read())
@@ -28,7 +29,12 @@ def gamerunning():
 	return redis_conn.exists('running_match')
 
 def currentgame():
-	return redis_conn.get('running_match')
+  if not gamerunning():
+    creategame()
+  return redis_conn.get('running_match')
+
+def gamename():
+  return unquote(currentgame()).decode('utf-8')
 
 def unique_id():
 	uid = str(uuid4())
@@ -39,14 +45,23 @@ def unique_id():
 	redis_conn.set(uid, sessison_data, session_exp)
 	return uid
 
+def wikicontent(html):
+  content = BeautifulSoup(html)
+  return content.find('div', {'id': 'content'})
+
 @app.route('/')
-def home():
-	if not gamerunning():
-		creategame()
-	game_name = unquote(currentgame()).decode('utf-8') 
-	response = make_response(render_template('index.html', app_name=app_name, current_game=game_name))
+def home(): 
+	response = make_response(render_template('index.html', app_name=app_name, current_game=gamename()))
 	response.set_cookie('game_session', unique_id())
 	return response
+
+@app.route('/wiki')
+@app.route('/wiki/<article>')
+def wiki(article = str(currentgame()) ):
+  wikipage = wikipedia + "/wiki/" + article
+  content = wikicontent(requests.get(wikipage).text)
+  response = make_response(render_template('wiki.html', app_name=app_name, current_game=gamename(), content=content))
+  return response
 
 if __name__ == '__main__':
 	app.run(debug=True)
