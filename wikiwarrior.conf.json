@@ -8,6 +8,7 @@
   "game": {
   	"wikipedia": "http://pt.wikipedia.org",
   	"session_expiration": 60,
-  	"match_expiration": 120
+  	"match_expiration": 120,
+  	"destination": "Brasil"
   }
 }

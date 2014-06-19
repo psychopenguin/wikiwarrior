@@ -18,6 +18,7 @@ redis_db = config['redis']['db']
 session_exp = config['game']['session_expiration']
 match_exp = config['game']['match_expiration']
 wikipedia = config['game']['wikipedia']
+destination = config['game']['destination']
 redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db) 
 
 def creategame():
@@ -71,12 +72,17 @@ def wiki(article = None ):
     article = currentgame()
   wikipage = requests.get(wikipedia + "/wiki/" + article).text
   content = wikicontent(wikipage)
+  if article == destination:
+  	gameover = True
+  else:
+  	gameover = False
   response = make_response(render_template('wiki.html',
     app_name=app_name,
     current_game=gamename(),
     content=content['text'],
     infobox=content['infobox'],
-    title=unquote(article).decode('utf-8').replace('_', ' ')
+    title=unquote(article).replace('_', ' '),
+    gameover=gameover
     )
   )
   return response
