@@ -22,9 +22,9 @@ destination = config['game']['destination']
 redis_conn = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db) 
 
 def creategame():
-	random_page = requests.get(wikipedia+'/wiki/Special:Random').url
-	article = random_page.split('/')[-1]
-	redis_conn.set('running_match', article, match_exp)
+  random_page = requests.get(wikipedia+'/wiki/Special:Random').url
+  article = random_page.split('/')[-1]
+  redis_conn.set('running_match', article, match_exp)
 
 def gamerunning():
 	return redis_conn.exists('running_match')
@@ -81,7 +81,7 @@ def wiki(article = None ):
     current_game=gamename(),
     content=content['text'],
     infobox=content['infobox'],
-    title=unquote(article).replace('_', ' '),
+    title=unquote(article).decode('utf-8').replace('_',' '),
     gameover=gameover
     )
   )
